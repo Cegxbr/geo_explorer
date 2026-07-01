@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Geo Explorer – карта туров</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <!-- flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <style>
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 196, 182, 0.6);
+                transform: scale(1);
+            }
+            70% {
+                box-shadow: 0 0 0 12px rgba(46, 196, 182, 0);
+                transform: scale(1.3);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 196, 182, 0);
+                transform: scale(1);
+            }
+        }
+        .pulse-marker {
+            animation: pulse-ring 1.2s infinite;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #CBD5E1;
+            border-radius: 3px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #2EC4B6;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #2EC4B6;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .custom-marker {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #A0E84D, #2EC4B6);
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s;
+        }
+        .custom-marker.unavailable {
+            background: #94A3B8;
+            border-color: #CBD5E1;
+        }
+
+        /* Хедер центрированный */
+        .header-glass {
+            background: rgba(240, 249, 255, 0.7);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        #map {
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        /* ========== ДЕСКТОПНАЯ ПАНЕЛЬ (справа) ========== */
+        .floating-panel {
+            position: fixed;
+            top: 5rem;
+            right: 1.5rem;
+            width: 360px;
+            max-height: calc(100vh - 7rem);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease;
+        }
+
+        /* ========== МОБИЛЬНАЯ ПАНЕЛЬ (нижний лист) ========== */
+        @media (max-width: 768px) {
+            .floating-panel {
+                top: auto;
+                right: 0;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                max-height: 70vh;
+                border-radius: 28px 28px 0 0;
+                box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+                transform: translateY(0);
+                background: rgba(255, 255, 255, 0.92);
+                backdrop-filter: blur(20px);
+                border: none;
+                border-top: 1px solid rgba(255, 255, 255, 0.6);
+            }
+
+            /* Ручка-индикатор вверху панели */
+            .panel-handle {
+                display: block !important;
+                width: 48px;
+                height: 5px;
+                background: #CBD5E1;
+                border-radius: 4px;
+                margin: 10px auto 6px;
+                flex-shrink: 0;
+                cursor: grab;
+                transition: background 0.2s;
+            }
+            .panel-handle:active {
+                cursor: grabbing;
+            }
+
+            .panel-tabs button {
+                font-size: 0.6rem;
+                padding: 0.5rem 0.25rem;
+            }
+
+            .panel-content {
+                padding: 0.75rem 1rem 1.2rem;
+            }
+
+            /* Контент внутри листа */
+            .panel-content .tour-card {
+                padding: 0.75rem;
+            }
+            .panel-content .tour-card img {
+                width: 56px;
+                height: 56px;
+            }
+            .panel-content .tour-card h4 {
+                font-size: 0.8rem;
+            }
+
+            /* Скрываем десктопную тень и бордер */
+            .floating-panel {
+                border: none;
+            }
+
+            /* Анимация появления снизу */
+            .floating-panel.slide-up {
+                transform: translateY(100%);
+                opacity: 0;
+                pointer-events: none;
+            }
+            .floating-panel.slide-up.active {
+                transform: translateY(0);
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+
+        /* Десктоп: ручка скрыта */
+        .panel-handle {
+            display: none;
+        }
+
+        .panel-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.5);
+            flex-shrink: 0;
+        }
+        .panel-tabs button {
+            flex: 1;
+            padding: 0.75rem 0.5rem;
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #8A9BB5;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            background: transparent;
+            cursor: pointer;
+        }
+        .panel-tabs button.active {
+            color: #1A4B84;
+            border-bottom-color: #2EC4B6;
+        }
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            -webkit-overflow-scrolling: touch;
+        }
+        .panel-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .panel-content::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 8px;
+        }
+        .panel-content::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 8px;
+        }
+
+        .chip {
+            transition: all 0.15s;
+            cursor: pointer;
+            user-select: none;
+        }
+        .chip.active {
+            background: #1A4B84;
+            color: white;
+            border-color: #1A4B84;
+        }
+        .tour-card {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .tour-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        @media (max-width: 768px) {
+            .tour-card:hover {
+                transform: none;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            }
+        }
+
+        .price-range-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .price-sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .price-sliders input[type="range"] {
+            margin: 0;
+        }
+        .price-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1A4B84;
+        }
+
+        /* Кнопка закрытия для мобильной панели (опционально) */
+        .panel-close-btn {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .panel-close-btn {
+                display: block;
+                position: absolute;
+                top: 12px;
+                right: 16px;
+                background: rgba(0, 0, 0, 0.04);
+                border: none;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                font-size: 1rem;
+                color: #64748B;
+                cursor: pointer;
+                transition: background 0.2s;
+                z-index: 5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .panel-close-btn:hover {
+                background: rgba(0, 0, 0, 0.08);
+            }
+            .panel-close-btn:active {
+                background: rgba(0, 0, 0, 0.12);
+            }
+        }
+
+        /* Затемнение фона для мобильного листа (оверлей) */
+        .panel-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.25);
+            z-index: 9;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .panel-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        @media (max-width: 768px) {
+            .panel-overlay {
+                display: block;
+            }
+        }
+
+        /* Кнопка-переключатель для мобильного открытия */
+        .mobile-toggle-btn {
+            display: none;
+            position: fixed;
+            bottom: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 11;
+            background: #1A4B84;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 8px 24px rgba(26, 75, 132, 0.35);
+            cursor: pointer;
+            transition: all 0.25s;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: 0.3px;
+        }
+        .mobile-toggle-btn:hover {
+            background: #0E3B6B;
+            transform: translateX(-50%) scale(1.02);
+        }
+        .mobile-toggle-btn:active {
+            transform: translateX(-50%) scale(0.96);
+        }
+        .mobile-toggle-btn .badge {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        @media (max-width: 768px) {
+            .mobile-toggle-btn {
+                display: flex;
+            }
+        }
+
+        /* Адаптация хедера на мобильных */
+        @media (max-width: 768px) {
+            header.header-glass {
+                top: 0.75rem;
+                width: calc(100% - 1.5rem);
+                border-radius: 2rem;
+            }
+            header .flex h1,
+            header .flex a {
+                font-size: 0.9rem;
+            }
+            header .flex .hidden.md\:flex {
+                display: none !important;
+            }
+        }
+
+        /* flatpickr кастомизация */
+        .flatpickr-calendar {
+            background: #1E293B !important;
+            border-radius: 16px !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        .flatpickr-calendar .flatpickr-month {
+            color: white !important;
+        }
+        .flatpickr-calendar .flatpickr-day {
+            color: #e2e8f0 !important;
+        }
+        .flatpickr-calendar .flatpickr-day.selected {
+            background: #2EC4B6 !important;
+            border-color: #2EC4B6 !important;
+        }
+        .flatpickr-calendar .flatpickr-day.inRange {
+            background: rgba(46, 196, 182, 0.25) !important;
+            border-color: rgba(46, 196, 182, 0.3) !important;
+        }
+        .flatpickr-calendar .flatpickr-day:hover {
+            background: #2EC4B6 !important;
+            color: white !important;
+        }
+        .flatpickr-calendar .flatpickr-day.disabled {
+            color: #475569 !important;
+        }
+        .flatpickr-calendar .flatpickr-weekday {
+            color: #94a3b8 !important;
+        }
+        .flatpickr-calendar .flatpickr-current-month .flatpickr-monthDropdown-months {
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased overflow-hidden">
+
+    <!-- ========== ОВЕРЛЕЙ ДЛЯ МОБИЛЬНОЙ ПАНЕЛИ ========== -->
+    <div class="panel-overlay" id="panelOverlay"></div>
+
+    <!-- ========== ХЕДЕР ========== -->
+    <header class="header-glass fixed top-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-[1000] rounded-3xl mx-auto">
+        <div class="mx-auto px-6 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="Index .html" class="text-xl md:text-2xl font-bold text-blue-900 tracking-tight">🌍 Geo Explorer</a>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="map page.html" data-page="map" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Карта</a>
+                    <a href="catalog.html" data-page="catalog" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Каталог</a>
+                    <a href="planner.html" data-page="planner" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Подбор тура</a>
+                </nav>
+                <div class="hidden md:flex items-center space-x-5">
+                    <a href="login.html" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition">Войти</a>
+                    <a href="register.html" class="bg-blue-900 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition inline-block">Регистрация</a>
+                    <select id="currency-selector" class="text-sm font-medium text-slate-600 hover:text-blue-800 bg-transparent border-none focus:ring-0 cursor-pointer">
+                        <option value="USD">🇺🇸 USD</option>
+                        <option value="EUR">🇪🇺 EUR</option>
+                        <option value="RUB">🇷🇺 RUB</option>
+                    </select>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-500 hover:text-[#1A4B84] focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-sky-100/40 backdrop-blur-md rounded-b-3xl">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="map page.html" data-page="map" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Карта</a>
+                <a href="catalog.html" data-page="catalog" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Каталог</a>
+                <a href="planner.html" data-page="planner" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Подбор тура</a>
+                <div class="px-3 py-2">
+                    <label for="currency-selector-mobile" class="block text-sm font-medium text-gray-700 mb-1">Валюта</label>
+                    <select id="currency-selector-mobile" class="w-full rounded-xl border-gray-300 bg-white/70 py-2 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                        <option value="USD">🇺🇸 USD</option>
+                        <option value="EUR">🇪🇺 EUR</option>
+                        <option value="RUB">🇷🇺 RUB</option>
+                    </select>
+                </div>
+                <div class="border-t border-gray-200 pt-4 pb-3 flex flex-wrap gap-3">
+                    <a href="login.html" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition">Войти</a>
+                    <a href="register.html" class="bg-blue-900 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition inline-block">Регистрация</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== КАРТА НА ВЕСЬ ЭКРАН ========== -->
+    <div id="map"></div>
+
+    <!-- ========== МОБИЛЬНАЯ КНОПКА ОТКРЫТИЯ ========== -->
+    <button class="mobile-toggle-btn" id="mobileToggleBtn">
+        <i class="fas fa-list-ul"></i>
+        Список туров
+        <span class="badge" id="tourCountBadge">0</span>
+    </button>
+
+    <!-- ========== ПЛАВАЮЩАЯ ПАНЕЛЬ ========== -->
+    <div class="floating-panel" id="floatingPanel">
+        <!-- Ручка для мобильной версии -->
+        <div class="panel-handle" id="panelHandle"></div>
+
+        <!-- Кнопка закрытия (мобильная) -->
+        <button class="panel-close-btn" id="panelCloseBtn" aria-label="Закрыть панель">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="panel-tabs">
+            <button data-tab="tours" class="active"><i class="fas fa-map-pin mr-1"></i> Туры</button>
+            <button data-tab="filters"><i class="fas fa-sliders-h mr-1"></i> Фильтры</button>
+            <button data-tab="calendar"><i class="fas fa-calendar-alt mr-1"></i> Календарь</button>
+        </div>
+        <div class="panel-content" id="panelContent">
+            <!-- Туры -->
+            <div id="tours-content" class="tab-content space-y-3"></div>
+
+            <!-- Фильтры -->
+            <div id="filters-content" class="tab-content hidden space-y-5">
+                <div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-[#1A4B84] mb-2">Тип отдыха</h3>
+                    <div class="flex flex-wrap gap-2" id="type-chips">
+                        <span data-type="beach" class="chip px-3 py-1.5 rounded-full bg-white border border-gray-300 text-sm font-medium text-gray-700">🏖 Пляжный</span>
+                        <span data-type="mountain" class="chip px-3 py-1.5 rounded-full bg-white border border-gray-300 text-sm font-medium text-gray-700">⛰ Горный</span>
+                        <span data-type="city" class="chip px-3 py-1.5 rounded-full bg-white border border-gray-300 text-sm font-medium text-gray-700">🏙 Городской</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-[#1A4B84] mb-2" id="price-label">Цена (USD)</h3>
+                    <div class="price-range-container">
+                        <div class="price-sliders">
+                            <label for="price-min" class="text-xs text-gray-500">от</label>
+                            <input type="range" id="price-min" min="0" max="5000" step="100" value="0" />
+                            <label for="price-max" class="text-xs text-gray-500 mt-1">до</label>
+                            <input type="range" id="price-max" min="0" max="5000" step="100" value="5000" />
+                        </div>
+                        <div class="price-labels">
+                            <span id="price-min-label">0</span>
+                            <span id="price-max-label">5000</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-[#1A4B84] mb-2">Длительность (дни)</h3>
+                    <input type="range" id="duration-slider" min="4" max="14" step="1" value="14" class="w-full">
+                    <div class="flex justify-between text-sm text-gray-800 mt-1">
+                        <span>4</span>
+                        <span id="duration-max-label">14</span>
+                    </div>
+                </div>
+                <button id="reset-filters" class="px-5 py-2 rounded-full border border-[#1A4B84] text-[#1A4B84] font-semibold text-sm hover:bg-[#1A4B84] hover:text-white transition">Сбросить всё</button>
+            </div>
+
+            <!-- Календарь -->
+            <div id="calendar-content" class="tab-content hidden">
+                <div class="bg-[#1E293B] rounded-xl p-3 shadow-lg">
+                    <div id="datepicker"></div>
+                </div>
+                <p id="date-range-display" class="text-center text-sm text-gray-800 mt-3">Выберите даты поездки</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключаем библиотеки -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js">
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js">
+    </script>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ==================== ВАЛЮТА ====================
+            const symbols = { USD: '$', EUR: '€', RUB: '₽' };
+            let currentCurrency = 'USD';
+            let exchangeRates = { USD: 1, EUR: 0.92, RUB: 88.5 };
+
+            async function fetchRates() {
+                try {
+                    const response = await fetch('https://api.exchangerate.host/latest?base=USD');
+                    if (!response.ok) throw new Error('API error');
+                    const data = await response.json();
+                    if (data && data.rates) {
+                        exchangeRates = {
+                            USD: 1,
+                            EUR: data.rates.EUR || 0.92,
+                            RUB: data.rates.RUB || 88.5
+                        };
+                        localStorage.setItem('exchangeRates', JSON.stringify(exchangeRates));
+                        localStorage.setItem('exchangeRatesTime', String(Date.now()));
+                    }
+                } catch (e) {
+                    console.warn('Не удалось загрузить курсы, используем сохранённые или запасные.');
+                    const cached = localStorage.getItem('exchangeRates');
+                    if (cached) {
+                        try {
+                            const parsed = JSON.parse(cached);
+                            if (parsed.USD && parsed.EUR && parsed.RUB) exchangeRates = parsed;
+                        } catch (_) {}
+                    }
+                }
+            }
+
+            function formatPrice(usdPrice) {
+                const rate = exchangeRates[currentCurrency] || 1;
+                const converted = (usdPrice * rate).toFixed(0);
+                return `${symbols[currentCurrency]} ${converted}`;
+            }
+
+            function parseDisplayPrice(displayValue) {
+                const num = parseFloat(displayValue.replace(/[^\d.]/g, ''));
+                return isNaN(num) ? 0 : num;
+            }
+
+            window.goToTour = function(tourId) {
+                localStorage.setItem('selectedTourId', tourId);
+                window.location.href = 'tour.html';
+            };
+
+            // ==================== МОБИЛЬНОЕ МЕНЮ ====================
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // ==================== МОБИЛЬНАЯ ПАНЕЛЬ (BOTTOM SHEET) ====================
+            const panel = document.getElementById('floatingPanel');
+            const overlay = document.getElementById('panelOverlay');
+            const toggleBtn = document.getElementById('mobileToggleBtn');
+            const closeBtn = document.getElementById('panelCloseBtn');
+            const handle = document.getElementById('panelHandle');
+            const panelContent = document.getElementById('panelContent');
+            let isPanelOpen = false;
+
+            // Определяем мобильное устройство по ширине
+            function isMobile() {
+                return window.innerWidth <= 768;
+            }
+
+            function openPanel() {
+                if (!isMobile()) return;
+                panel.classList.remove('slide-up');
+                panel.classList.add('active');
+                overlay.classList.add('active');
+                isPanelOpen = true;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closePanel() {
+                if (!isMobile()) return;
+                panel.classList.add('slide-up');
+                panel.classList.remove('active');
+                overlay.classList.remove('active');
+                isPanelOpen = false;
+                document.body.style.overflow = '';
+            }
+
+            function togglePanel() {
+                if (isPanelOpen) {
+                    closePanel();
+                } else {
+                    openPanel();
+                }
+            }
+
+            // Открытие по кнопке
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    togglePanel();
+                });
+            }
+
+            // Закрытие по крестику
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closePanel();
+                });
+            }
+
+            // Закрытие по оверлею
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) closePanel();
+                });
+            }
+
+            // Закрытие по свайпу вниз на ручке
+            let startY = 0;
+            let currentY = 0;
+            let isDragging = false;
+
+            if (handle) {
+                handle.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                    isDragging = true;
+                }, { passive: true });
+
+                handle.addEventListener('touchmove', (e) => {
+                    if (!isDragging) return;
+                    currentY = e.touches[0].clientY;
+                    const diff = currentY - startY;
+                    if (diff > 20) {
+                        closePanel();
+                        isDragging = false;
+                    }
+                }, { passive: true });
+
+                handle.addEventListener('touchend', () => {
+                    isDragging = false;
+                }, { passive: true });
+            }
+
+            // Адаптация при ресайзе
+            window.addEventListener('resize', () => {
+                if (!isMobile() && isPanelOpen) {
+                    closePanel();
+                }
+                // На десктопе убираем slide-up класс
+                if (!isMobile()) {
+                    panel.classList.remove('slide-up', 'active');
+                    if (overlay) overlay.classList.remove('active');
+                    isPanelOpen = false;
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // При загрузке на мобильном панель скрыта
+            if (isMobile()) {
+                panel.classList.add('slide-up');
+                panel.classList.remove('active');
+            }
+
+            // ==================== ЗАГРУЗКА ДАННЫХ ====================
+            let tours = [];
+
+            async function loadTours() {
+                try {
+                    const response = await fetch('tours.json');
+                    if (!response.ok) throw new Error('Ошибка загрузки tours.json');
+                    tours = await response.json();
+                    console.log('Загружено туров:', tours.length);
+                } catch (err) {
+                    console.error('Не удалось загрузить данные туров:', err);
+                    tours = [];
+                }
+                initApp();
+            }
+
+            // ==================== СОСТОЯНИЕ ФИЛЬТРОВ ====================
+            const filterState = {
+                types: [],
+                priceMin: 0,
+                priceMax: 5000,
+                durationMax: 14,
+                dateRange: null
+            };
+
+            // ==================== КАРТА ====================
+            let map, markerCluster, markerMap;
+
+            function initMap() {
+                map = L.map('map', {
+                    center: [20, 20],
+                    zoom: 3,
+                    zoomControl: true
+                });
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+                    subdomains: 'abcd',
+                    maxZoom: 19
+                }).addTo(map);
+
+                markerCluster = L.markerClusterGroup({
+                    chunkedLoading: true,
+                    spiderfyOnMaxZoom: true,
+                    showCoverageOnHover: false,
+                    iconCreateFunction: function(cluster) {
+                        const count = cluster.getChildCount();
+                        return L.divIcon({
+                            html: `<div style="background:#1A4B84;color:white;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-weight:bold;">${count}</div>`,
+                            className: 'marker-cluster-custom',
+                            iconSize: L.point(40, 40)
+                        });
+                    }
+                });
+                markerMap = new Map();
+            }
+
+            function createMarker(tour, isAvailable) {
+                const className = isAvailable ? 'custom-marker' : 'custom-marker unavailable';
+                const icon = L.divIcon({
+                    html: `<div class="${className}"></div>`,
+                    className: 'custom-marker-wrapper',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                });
+                const marker = L.marker(tour.coords, { icon });
+                marker.tourId = tour.id;
+                const popupContent = `
+              <div style="min-width:160px;">
+                <strong>${tour.name}</strong><br>
+                ${tour.duration} дн., ${formatPrice(tour.price)}<br>
+                ⭐ ${tour.rating}
+                <br>
+                <button onclick="goToTour(${tour.id})" class="mt-2 bg-[#1A4B84] text-white px-4 py-1 rounded-full text-sm hover:bg-[#0E3B6B] transition">Подробнее</button>
+              </div>
+            `;
+                marker.bindPopup(popupContent);
+                marker.bindTooltip(tour.name, { direction: 'top', offset: [0, -15] });
+                return marker;
+            }
+
+            function buildAllMarkers() {
+                markerCluster.clearLayers();
+                markerMap.clear();
+
+                tours.forEach(tour => {
+                    const available = isTourAvailable(tour);
+                    const marker = createMarker(tour, available);
+                    markerMap.set(tour.id, marker);
+                    if (available) {
+                        markerCluster.addLayer(marker);
+                    }
+                });
+                map.addLayer(markerCluster);
+            }
+
+            function isTourAvailable(tour) {
+                if (filterState.types.length && !filterState.types.includes(tour.type)) return false;
+                if (tour.price < filterState.priceMin || tour.price > filterState.priceMax) return false;
+                if (tour.duration > filterState.durationMax) return false;
+                if (filterState.dateRange) {
+                    const { start, end } = filterState.dateRange;
+                    const overlap = tour.available.some(range => {
+                        const rs = new Date(range.start);
+                        const re = new Date(range.end);
+                        return start <= re && end >= rs;
+                    });
+                    if (!overlap) return false;
+                }
+                return true;
+            }
+
+            function applyFilters() {
+                markerMap.forEach((marker, id) => {
+                    const tour = tours.find(t => t.id === id);
+                    if (!tour) return;
+                    const available = isTourAvailable(tour);
+                    const el = marker.getElement();
+                    if (el) {
+                        const circle = el.querySelector('.custom-marker');
+                        if (circle) {
+                            if (available) circle.classList.remove('unavailable');
+                            else circle.classList.add('unavailable');
+                        }
+                    }
+                    if (available) {
+                        if (!markerCluster.hasLayer(marker)) markerCluster.addLayer(marker);
+                    } else {
+                        if (markerCluster.hasLayer(marker)) markerCluster.removeLayer(marker);
+                    }
+                });
+                renderTourList();
+                updateBadge();
+            }
+
+            // ==================== РЕНДЕРИНГ СПИСКА ====================
+            const toursContainer = document.getElementById('tours-content');
+            const badge = document.getElementById('tourCountBadge');
+
+            function renderTourList() {
+                const filtered = tours.filter(t => isTourAvailable(t));
+                if (!filtered.length) {
+                    toursContainer.innerHTML = `<p class="text-center text-gray-500 py-6">Нет туров по заданным фильтрам</p>`;
+                    return;
+                }
+                let html = '';
+                filtered.forEach(tour => {
+                    html += `
+                <div class="tour-card flex gap-3 bg-white rounded-xl p-3 shadow-sm hover:shadow-md transition" data-tour-id="${tour.id}">
+                  <img src="${tour.img}" alt="${tour.name}" class="w-16 h-16 rounded-xl object-cover" loading="lazy"/>
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-[#0C1E33] text-sm">${tour.name}</h4>
+                    <div class="flex items-center gap-2 text-xs text-gray-500 mt-1">
+                      <span class="bg-blue-50 text-[#1A4B84] px-2 py-0.5 rounded-full text-xs font-medium">${tour.type === 'beach' ? 'Пляж' : tour.type === 'mountain' ? 'Горы' : 'Город'}</span>
+                      <span>${tour.duration} дн.</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-1.5 text-xs">
+                      <span class="font-bold text-[#1A4B84]">${formatPrice(tour.price)}</span>
+                      <span class="text-yellow-500">★ ${tour.rating}</span>
+                    </div>
+                    <button onclick="event.stopPropagation(); goToTour(${tour.id})" class="mt-2 bg-[#1A4B84] text-white px-4 py-1.5 rounded-full text-xs font-semibold hover:bg-[#0E3B6B] transition self-end">
+                      Подробнее
+                    </button>
+                  </div>
+                </div>`;
+                });
+                toursContainer.innerHTML = html;
+
+                document.querySelectorAll('.tour-card').forEach(card => {
+                    const id = parseInt(card.dataset.tourId);
+                    const marker = markerMap.get(id);
+                    if (!marker) return;
+                    card.addEventListener('click', (e) => {
+                        if (e.target.closest('button')) return;
+                        const latlng = marker.getLatLng();
+                        map.flyTo(latlng, 8, { duration: 1.5 });
+                        setTimeout(() => marker.openPopup(), 1500);
+                        // На мобильном закрываем панель после выбора
+                        if (isMobile() && isPanelOpen) {
+                            setTimeout(closePanel, 800);
+                        }
+                    });
+                    card.addEventListener('mouseenter', () => {
+                        const el = marker.getElement();
+                        if (el) {
+                            const circle = el.querySelector('.custom-marker');
+                            if (circle) circle.classList.add('pulse-marker');
+                        }
+                    });
+                    card.addEventListener('mouseleave', () => {
+                        const el = marker.getElement();
+                        if (el) {
+                            const circle = el.querySelector('.custom-marker');
+                            if (circle) circle.classList.remove('pulse-marker');
+                        }
+                    });
+                });
+            }
+
+            function updateBadge() {
+                if (badge) {
+                    const count = tours.filter(t => isTourAvailable(t)).length;
+                    badge.textContent = count;
+                }
+            }
+
+            // ==================== ФИЛЬТРЫ UI ====================
+            const typeChips = document.querySelectorAll('#type-chips .chip');
+            const priceMinSlider = document.getElementById('price-min');
+            const priceMaxSlider = document.getElementById('price-max');
+            const priceMinLabel = document.getElementById('price-min-label');
+            const priceMaxLabel = document.getElementById('price-max-label');
+            const durationSlider = document.getElementById('duration-slider');
+            const durationMaxLabel = document.getElementById('duration-max-label');
+            const resetBtn = document.getElementById('reset-filters');
+            const priceLabel = document.getElementById('price-label');
+
+            function updatePriceDisplay() {
+                const minUsd = parseInt(priceMinSlider.value);
+                const maxUsd = parseInt(priceMaxSlider.value);
+                priceMinLabel.textContent = formatPrice(minUsd);
+                priceMaxLabel.textContent = formatPrice(maxUsd);
+                priceLabel.textContent = `Цена (${currentCurrency})`;
+            }
+
+            priceMinSlider.addEventListener('input', () => {
+                let minVal = parseInt(priceMinSlider.value);
+                const maxVal = parseInt(priceMaxSlider.value);
+                if (minVal > maxVal) {
+                    priceMinSlider.value = maxVal;
+                    minVal = maxVal;
+                }
+                filterState.priceMin = minVal;
+                updatePriceDisplay();
+                applyFilters();
+            });
+
+            priceMaxSlider.addEventListener('input', () => {
+                let maxVal = parseInt(priceMaxSlider.value);
+                const minVal = parseInt(priceMinSlider.value);
+                if (maxVal < minVal) {
+                    priceMaxSlider.value = minVal;
+                    maxVal = minVal;
+                }
+                filterState.priceMax = maxVal;
+                updatePriceDisplay();
+                applyFilters();
+            });
+
+            durationSlider.addEventListener('input', () => {
+                filterState.durationMax = +durationSlider.value;
+                durationMaxLabel.textContent = durationSlider.value;
+                applyFilters();
+            });
+
+            typeChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    chip.classList.toggle('active');
+                    updateTypeFilter();
+                });
+            });
+
+            function updateTypeFilter() {
+                const active = [];
+                typeChips.forEach(c => {
+                    if (c.classList.contains('active')) active.push(c.dataset.type);
+                });
+                filterState.types = active;
+                applyFilters();
+            }
+
+            resetBtn.addEventListener('click', () => {
+                typeChips.forEach(c => c.classList.remove('active'));
+                filterState.types = [];
+                priceMinSlider.value = 0;
+                priceMaxSlider.value = 5000;
+                filterState.priceMin = 0;
+                filterState.priceMax = 5000;
+                updatePriceDisplay();
+                durationSlider.value = 14;
+                filterState.durationMax = 14;
+                durationMaxLabel.textContent = '14';
+                if (datePicker) datePicker.clear();
+                filterState.dateRange = null;
+                document.getElementById('date-range-display').textContent = 'Выберите даты поездки';
+                applyFilters();
+            });
+
+            // ==================== КАЛЕНДАРЬ ====================
+            const datePickerEl = document.getElementById('datepicker');
+            const dateRangeDisplay = document.getElementById('date-range-display');
+            let datePicker;
+
+            datePicker = flatpickr(datePickerEl, {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                locale: "ru",
+                inline: true,
+                minDate: "2026-06-01",
+                maxDate: "2026-12-31",
+                onChange: function(selectedDates) {
+                    if (selectedDates.length === 2) {
+                        filterState.dateRange = { start: selectedDates[0], end: selectedDates[1] };
+                        dateRangeDisplay.textContent =
+                            `${selectedDates[0].toLocaleDateString('ru')} – ${selectedDates[1].toLocaleDateString('ru')}`;
+                    } else {
+                        filterState.dateRange = null;
+                        dateRangeDisplay.textContent = 'Выберите даты поездки';
+                    }
+                    applyFilters();
+                }
+            });
+
+            // ==================== ТАБЫ ====================
+            const tabButtons = document.querySelectorAll('.panel-tabs button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    tabContents.forEach(c => c.classList.add('hidden'));
+                    document.getElementById(`${tab}-content`).classList.remove('hidden');
+                });
+            });
+
+            // ==================== СМЕНА ВАЛЮТЫ ====================
+            const selectorDesktop = document.getElementById('currency-selector');
+            const selectorMobile = document.getElementById('currency-selector-mobile');
+
+            function onCurrencyChange(e) {
+                const currency = e.target.value;
+                currentCurrency = currency;
+                if (selectorDesktop && selectorDesktop.value !== currency) selectorDesktop.value = currency;
+                if (selectorMobile && selectorMobile.value !== currency) selectorMobile.value = currency;
+                localStorage.setItem('preferredCurrency', currency);
+                updatePriceDisplay();
+                renderTourList();
+                markerMap.forEach((marker, id) => {
+                    const tour = tours.find(t => t.id === id);
+                    if (!tour) return;
+                    const newContent = `
+                <div style="min-width:160px;">
+                  <strong>${tour.name}</strong><br>
+                  ${tour.duration} дн., ${formatPrice(tour.price)}<br>
+                  ⭐ ${tour.rating}
+                  <br>
+                  <button onclick="goToTour(${tour.id})" class="mt-2 bg-[#1A4B84] text-white px-4 py-1 rounded-full text-sm hover:bg-[#0E3B6B] transition">Подробнее</button>
+                </div>
+              `;
+                    marker.setPopupContent(newContent);
+                });
+                priceLabel.textContent = `Цена (${currency})`;
+                updateBadge();
+            }
+
+            if (selectorDesktop) selectorDesktop.addEventListener('change', onCurrencyChange);
+            if (selectorMobile) selectorMobile.addEventListener('change', onCurrencyChange);
+
+            // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+            async function initApp() {
+                await fetchRates();
+
+                const savedCurrency = localStorage.getItem('preferredCurrency') || 'USD';
+                currentCurrency = savedCurrency;
+                if (selectorDesktop) selectorDesktop.value = savedCurrency;
+                if (selectorMobile) selectorMobile.value = savedCurrency;
+
+                priceMinSlider.value = filterState.priceMin;
+                priceMaxSlider.value = filterState.priceMax;
+                updatePriceDisplay();
+                priceLabel.textContent = `Цена (${savedCurrency})`;
+
+                durationSlider.value = filterState.durationMax;
+                durationMaxLabel.textContent = filterState.durationMax;
+
+                initMap();
+                buildAllMarkers();
+                renderTourList();
+                updateBadge();
+
+                document.querySelector('.panel-tabs button.active')?.click();
+
+                // На мобильном панель изначально скрыта
+                if (isMobile()) {
+                    panel.classList.add('slide-up');
+                    panel.classList.remove('active');
+                    isPanelOpen = false;
+                }
+            }
+
+            loadTours();
+
+            // ==================== ДОПОЛНИТЕЛЬНО: ЗАКРЫТИЕ ПО ESC ====================
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isPanelOpen) {
+                    closePanel();
+                }
+            });
+
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geo Explorer – детали тура</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <style>
+    body { background: #faf7f0; }
+    .header-glass {
+      background: rgba(240, 249, 255, 0.7);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .tour-detail-card {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+    .btn-primary {
+      background: #1A4B84;
+      color: white;
+      padding: 0.75rem 2.5rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover {
+      background: #0e3b6b;
+    }
+    .btn-outline {
+      border: 1px solid #1A4B84;
+      color: #1A4B84;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: #1A4B84;
+      color: white;
+    }
+    .date-badge {
+      background: #e2e8f0;
+      padding: 0.3rem 0.8rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      color: #1A4B84;
+    }
+    .review-card {
+      background: #f8fafc;
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== ХЕДЕР (центрированный) ========== -->
+  <header class="header-glass fixed top-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-[1000] rounded-3xl mx-auto">
+    <div class="mx-auto px-6 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex-shrink-0 flex items-center">
+          <a href="Index .html" class="text-xl md:text-2xl font-bold text-blue-900 tracking-tight">🌍 Geo Explorer</a>
+        </div>
+        <nav class="hidden md:flex space-x-8">
+          <a href="map page.html" data-page="map" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Карта</a>
+          <a href="catalog.html" data-page="catalog" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Каталог</a>
+          <a href="planner.html" data-page="planner" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Подбор тура</a>
+        </nav>
+        <div class="hidden md:flex items-center space-x-5">
+          <a href="login.html" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition">Войти</a>
+          <a href="register.html" class="bg-blue-900 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition inline-block">Регистрация</a>
+          <select id="currency-selector" class="text-sm font-medium text-slate-600 hover:text-blue-800 bg-transparent border-none focus:ring-0 cursor-pointer">
+            <option value="USD">🇺🇸 USD</option>
+            <option value="EUR">🇪🇺 EUR</option>
+            <option value="RUB">🇷🇺 RUB</option>
+          </select>
+        </div>
+        <div class="md:hidden flex items-center">
+          <button id="mobile-menu-button" class="text-gray-500 hover:text-[#1A4B84] focus:outline-none">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-sky-100/40 backdrop-blur-md rounded-b-3xl">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="map page.html" data-page="map" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Карта</a>
+        <a href="catalog.html" data-page="catalog" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Каталог</a>
+        <a href="planner.html" data-page="planner" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Подбор тура</a>
+        <div class="px-3 py-2">
+          <label for="currency-selector-mobile" class="block text-sm font-medium text-gray-700 mb-1">Валюта</label>
+          <select id="currency-selector-mobile" class="w-full rounded-xl border-gray-300 bg-white/70 py-2 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+            <option value="USD">🇺🇸 USD</option>
+            <option value="EUR">🇪🇺 EUR</option>
+            <option value="RUB">🇷🇺 RUB</option>
+          </select>
+        </div>
+        <div class="border-t border-gray-200 pt-4 pb-3">
+          <a href="login.html" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition">Войти</a>
+          <a href="register.html" class="bg-blue-900 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition inline-block">Регистрация</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== ОСНОВНОЙ КОНТЕНТ ========== -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-28 pb-12">
+    <div id="tour-content">
+      <!-- Здесь будет отрисован тур после загрузки данных -->
+      <div class="text-center py-12">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-900"></i>
+        <p class="text-gray-500 mt-4">Загрузка информации о туре...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== ПОДКЛЮЧАЕМ СКРИПТЫ ========== -->
+  <script>
+    (function() {
+      // ==================== ВАЛЮТА ====================
+      const symbols = { USD: '$', EUR: '€', RUB: '₽' };
+      let currentCurrency = 'USD';
+      let exchangeRates = { USD: 1, EUR: 0.92, RUB: 88.5 };
+
+      async function fetchRates() {
+        try {
+          const response = await fetch('https://api.exchangerate.host/latest?base=USD');
+          if (!response.ok) throw new Error('API error');
+          const data = await response.json();
+          if (data && data.rates) {
+            exchangeRates = {
+              USD: 1,
+              EUR: data.rates.EUR || 0.92,
+              RUB: data.rates.RUB || 88.5
+            };
+            localStorage.setItem('exchangeRates', JSON.stringify(exchangeRates));
+            localStorage.setItem('exchangeRatesTime', String(Date.now()));
+          }
+        } catch (e) {
+          console.warn('Не удалось загрузить курсы, используем сохранённые или запасные.');
+          const cached = localStorage.getItem('exchangeRates');
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              if (parsed.USD && parsed.EUR && parsed.RUB) exchangeRates = parsed;
+            } catch (_) {}
+          }
+        }
+      }
+
+      function formatPrice(usdPrice) {
+        const rate = exchangeRates[currentCurrency] || 1;
+        const converted = (usdPrice * rate).toFixed(0);
+        return `${symbols[currentCurrency]} ${converted}`;
+      }
+
+      // ==================== МОБИЛЬНОЕ МЕНЮ ====================
+      const mobileMenuButton = document.getElementById('mobile-menu-button');
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+
+      // ==================== ЗАГРУЗКА ДАННЫХ ====================
+      let tours = [];
+      async function loadTours() {
+        try {
+          const response = await fetch('tours.json');
+          if (!response.ok) throw new Error('Ошибка загрузки tours.json');
+          tours = await response.json();
+          console.log('Загружено туров:', tours.length);
+        } catch (err) {
+          console.error('Не удалось загрузить данные туров:', err);
+          tours = [];
+        }
+        // После загрузки данных отображаем тур
+        displayTour();
+      }
+
+      // ==================== ОТОБРАЖЕНИЕ ТУРА ====================
+      function displayTour() {
+        const container = document.getElementById('tour-content');
+        // Получаем ID тура из localStorage
+        const tourId = localStorage.getItem('selectedTourId');
+        if (!tourId) {
+          container.innerHTML = `
+            <div class="text-center py-12">
+              <i class="fas fa-exclamation-triangle text-4xl text-amber-500"></i>
+              <h2 class="text-2xl font-bold text-blue-900 mt-4">Тур не выбран</h2>
+              <p class="text-gray-600 mt-2">Пожалуйста, вернитесь на главную или в каталог и выберите тур.</p>
+              <a href="Index .html" class="btn-primary inline-block mt-6">На главную</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Находим тур по ID
+        const tour = tours.find(t => t.id === parseInt(tourId));
+        if (!tour) {
+          container.innerHTML = `
+            <div class="text-center py-12">
+              <i class="fas fa-search text-4xl text-red-400"></i>
+              <h2 class="text-2xl font-bold text-blue-900 mt-4">Тур не найден</h2>
+              <p class="text-gray-600 mt-2">Возможно, тур был удалён или изменился ID.</p>
+              <a href="catalog.html" class="btn-primary inline-block mt-6">Вернуться в каталог</a>
+            </div>
+          `;
+          return;
+        }
+
+        // Формируем HTML с деталями тура
+        const priceFormatted = formatPrice(tour.price);
+        // Доп. информация: доступные даты
+        let datesHtml = '';
+        if (tour.available && tour.available.length) {
+          datesHtml = tour.available.map(d => `<span class="date-badge">${d.start} — ${d.end}</span>`).join(' ');
+        } else {
+          datesHtml = '<span class="text-gray-500">Даты уточняйте у менеджера</span>';
+        }
+
+        container.innerHTML = `
+          <div class="tour-detail-card">
+            <!-- Изображение -->
+            <div class="h-80 md:h-96 bg-cover bg-center" style="background-image: url('${tour.img || 'images/default.jpg'}');"></div>
+            <!-- Контент -->
+            <div class="p-6 md:p-8">
+              <div class="flex flex-wrap justify-between items-start gap-4">
+                <div>
+                  <h1 class="text-3xl md:text-4xl font-bold text-blue-900">${tour.name}</h1>
+                  <div class="flex items-center gap-4 mt-2">
+                    <span class="text-amber-500 text-lg"><i class="fas fa-star"></i> ${tour.rating}</span>
+                    <span class="text-gray-500">${tour.duration} дней / ${tour.duration-1} ночей</span>
+                    <span class="bg-blue-50 text-[#1A4B84] px-3 py-1 rounded-full text-sm font-medium">${tour.type === 'beach' ? 'Пляжный' : tour.type === 'mountain' ? 'Горный' : 'Городской'}</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-3xl font-bold text-blue-900">${priceFormatted}</div>
+                  <button class="btn-primary mt-2">Забронировать</button>
+                </div>
+              </div>
+
+              <!-- Описание -->
+              <div class="mt-6 border-t border-gray-200 pt-6">
+                <h2 class="text-xl font-semibold text-blue-900 mb-3">Описание тура</h2>
+                <p class="text-gray-700 leading-relaxed">${tour.description || 'Подробное описание этого увлекательного путешествия скоро появится. Свяжитесь с нами для получения дополнительной информации.'}</p>
+              </div>
+
+              <!-- Доступные даты -->
+              <div class="mt-6 border-t border-gray-200 pt-6">
+                <h2 class="text-xl font-semibold text-blue-900 mb-3">Доступные даты</h2>
+                <div class="flex flex-wrap gap-2">${datesHtml}</div>
+              </div>
+
+              <!-- Доп. информация (можно добавить отзывы, карту и т.п.) -->
+              <div class="mt-6 border-t border-gray-200 pt-6">
+                <h2 class="text-xl font-semibold text-blue-900 mb-3">Отзывы клиентов</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="review-card">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-900">АК</div>
+                      <div>
+                        <p class="font-medium text-blue-900">Анна К.</p>
+                        <div class="text-amber-400 text-sm"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                      </div>
+                    </div>
+                    <p class="text-gray-700 text-sm mt-2">«Невероятный отдых! Всё было на высшем уровне. Обязательно вернусь ещё.»</p>
+                  </div>
+                  <div class="review-card">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-900">МП</div>
+                      <div>
+                        <p class="font-medium text-blue-900">Михаил П.</p>
+                        <div class="text-amber-400 text-sm"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                      </div>
+                    </div>
+                    <p class="text-gray-700 text-sm mt-2">«Отличная организация, великолепная природа. Спасибо команде Geo Explorer!»</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Кнопка "Назад" -->
+              <div class="mt-8 border-t border-gray-200 pt-6 flex justify-between">
+                <a href="catalog.html" class="btn-outline"><i class="fas fa-arrow-left mr-2"></i> Назад к каталогу</a>
+                <a href="Index .html" class="text-blue-900 hover:underline">На главную →</a>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // ==================== СМЕНА ВАЛЮТЫ ====================
+      const selectorDesktop = document.getElementById('currency-selector');
+      const selectorMobile = document.getElementById('currency-selector-mobile');
+
+      function onCurrencyChange(e) {
+        const currency = e.target.value;
+        currentCurrency = currency;
+        if (selectorDesktop && selectorDesktop.value !== currency) selectorDesktop.value = currency;
+        if (selectorMobile && selectorMobile.value !== currency) selectorMobile.value = currency;
+        localStorage.setItem('preferredCurrency', currency);
+        // Перерисовываем тур с новыми ценами
+        displayTour();
+      }
+
+      if (selectorDesktop) selectorDesktop.addEventListener('change', onCurrencyChange);
+      if (selectorMobile) selectorMobile.addEventListener('change', onCurrencyChange);
+
+      // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+      async function initApp() {
+        await fetchRates();
+
+        const savedCurrency = localStorage.getItem('preferredCurrency') || 'USD';
+        currentCurrency = savedCurrency;
+        if (selectorDesktop) selectorDesktop.value = savedCurrency;
+        if (selectorMobile) selectorMobile.value = savedCurrency;
+
+        // Загружаем данные туров
+        await loadTours();
+      }
+
+      initApp();
+    })();
+  </script>
+
+</body>
+</html>

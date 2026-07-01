@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geo Explorer – регистрация</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <style>
+    body { background: #faf7f0; display: flex; flex-direction: column; min-height: 100vh; }
+    .header-glass {
+      background: rgba(240, 249, 255, 0.7);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .auth-card {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15);
+      padding: 2rem;
+      max-width: 420px;
+      width: 100%;
+      margin: 2rem auto;
+    }
+    .btn-primary {
+      background: #1A4B84;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    .btn-primary:hover {
+      background: #0e3b6b;
+    }
+    .btn-outline {
+      border: 1px solid #1A4B84;
+      color: #1A4B84;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: #1A4B84;
+      color: white;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      background: #f9fafb;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #1A4B84;
+      box-shadow: 0 0 0 3px rgba(26,75,132,0.1);
+    }
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9ca3af;
+      cursor: pointer;
+    }
+    .password-toggle:hover { color: #1A4B84; }
+    .relative { position: relative; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== ХЕДЕР (центрированный) ========== -->
+  <header class="header-glass fixed top-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-[1000] rounded-3xl mx-auto">
+    <div class="mx-auto px-6 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex-shrink-0 flex items-center">
+          <a href="Index .html" class="text-xl md:text-2xl font-bold text-blue-900 tracking-tight">🌍 Geo Explorer</a>
+        </div>
+        <nav class="hidden md:flex space-x-8">
+          <a href="map page.html" data-page="map" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Карта</a>
+          <a href="catalog.html" data-page="catalog" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Каталог</a>
+          <a href="planner.html" data-page="planner" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Подбор тура</a>
+        </nav>
+        <div class="hidden md:flex items-center space-x-5">
+          <select id="currency-selector" class="text-sm font-medium text-slate-600 hover:text-blue-800 bg-transparent border-none focus:ring-0 cursor-pointer">
+            <option value="USD">🇺🇸 USD</option>
+            <option value="EUR">🇪🇺 EUR</option>
+            <option value="RUB">🇷🇺 RUB</option>
+          </select>
+        </div>
+        <div class="md:hidden flex items-center">
+          <button id="mobile-menu-button" class="text-gray-500 hover:text-[#1A4B84] focus:outline-none">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-sky-100/40 backdrop-blur-md rounded-b-3xl">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="map page.html" data-page="map" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Карта</a>
+        <a href="catalog.html" data-page="catalog" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Каталог</a>
+        <a href="planner.html" data-page="planner" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Подбор тура</a>
+        <div class="px-3 py-2">
+          <label for="currency-selector-mobile" class="block text-sm font-medium text-gray-700 mb-1">Валюта</label>
+          <select id="currency-selector-mobile" class="w-full rounded-xl border-gray-300 bg-white/70 py-2 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+            <option value="USD">🇺🇸 USD</option>
+            <option value="EUR">🇪🇺 EUR</option>
+            <option value="RUB">🇷🇺 RUB</option>
+          </select>
+        </div>
+        <div class="border-t border-gray-200 pt-4 pb-3">
+          <button class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-[#1A4B84]">Войти</button>
+          <button class="block w-full text-left px-3 py-2 text-base font-medium text-[#1A4B84] hover:bg-gray-50 rounded-md">Регистрация</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== ОСНОВНОЙ КОНТЕНТ ========== -->
+  <main class="flex-1 flex items-center justify-center px-4 mt-24">
+    <div class="auth-card">
+      <h1 class="text-2xl font-bold text-blue-900 text-center mb-6">Создать аккаунт</h1>
+
+      <form id="register-form" class="space-y-4">
+        <div>
+          <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">Полное имя</label>
+          <input type="text" id="fullname" class="form-input" placeholder="Иван Иванов" required />
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="email" class="form-input" placeholder="example@mail.ru" required />
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Пароль</label>
+          <div class="relative">
+            <input type="password" id="password" class="form-input pr-10" placeholder="Придумайте пароль" required />
+            <span class="password-toggle" onclick="togglePasswordVisibility('password', this)">
+              <i class="fas fa-eye"></i>
+            </span>
+          </div>
+        </div>
+        <div>
+          <label for="password-confirm" class="block text-sm font-medium text-gray-700 mb-1">Подтверждение пароля</label>
+          <div class="relative">
+            <input type="password" id="password-confirm" class="form-input pr-10" placeholder="Повторите пароль" required />
+            <span class="password-toggle" onclick="togglePasswordVisibility('password-confirm', this)">
+              <i class="fas fa-eye"></i>
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-700">
+          <input type="checkbox" id="agree" class="rounded border-gray-300 text-blue-900 focus:ring-blue-500" required />
+          <label for="agree">Я согласен с <a href="#" class="text-blue-900 hover:underline">условиями использования</a></label>
+        </div>
+        <button type="submit" class="btn-primary">Зарегистрироваться</button>
+      </form>
+
+      <div class="mt-6 text-center text-sm text-gray-600">
+        Уже есть аккаунт? <a href="login.html" class="text-blue-900 font-semibold hover:underline">Войти</a>
+      </div>
+
+      <div class="mt-6 border-t border-gray-200 pt-6">
+        <p class="text-center text-xs text-gray-500">Регистрация через социальные сети</p>
+        <div class="flex justify-center gap-4 mt-3">
+          <button class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition flex items-center justify-center text-gray-600"><i class="fab fa-google"></i></button>
+          <button class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition flex items-center justify-center text-gray-600"><i class="fab fa-facebook-f"></i></button>
+          <button class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition flex items-center justify-center text-gray-600"><i class="fab fa-apple"></i></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== СКРИПТЫ ========== -->
+  <script>
+    // Мобильное меню
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // Показать/скрыть пароль
+    window.togglePasswordVisibility = function(inputId, toggleElement) {
+      const input = document.getElementById(inputId);
+      const icon = toggleElement.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    };
+
+    // Обработка отправки формы (демонстрация)
+    document.getElementById('register-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('fullname').value;
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      const confirm = document.getElementById('password-confirm').value;
+      if (pass !== confirm) {
+        alert('Пароли не совпадают!');
+        return;
+      }
+      console.log('Регистрация:', { name, email, pass });
+      window.location.href = 'profile.html';
+      alert(`Аккаунт для ${name} создан (демо-режим)`);
+      // Здесь можно перейти на страницу входа или на главную
+      // window.location.href = 'login.html';
+    });
+
+    // Смена валюты (для единообразия)
+    const selectorDesktop = document.getElementById('currency-selector');
+    const selectorMobile = document.getElementById('currency-selector-mobile');
+    if (selectorDesktop) {
+      selectorDesktop.addEventListener('change', function() {
+        if (selectorMobile) selectorMobile.value = this.value;
+        localStorage.setItem('preferredCurrency', this.value);
+      });
+    }
+    if (selectorMobile) {
+      selectorMobile.addEventListener('change', function() {
+        if (selectorDesktop) selectorDesktop.value = this.value;
+        localStorage.setItem('preferredCurrency', this.value);
+      });
+    }
+    const saved = localStorage.getItem('preferredCurrency') || 'USD';
+    if (selectorDesktop) selectorDesktop.value = saved;
+    if (selectorMobile) selectorMobile.value = saved;
+  </script>
+
+</body>
+</html>

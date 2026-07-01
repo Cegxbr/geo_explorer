@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geo Explorer – профиль</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <style>
+    body { background: #faf7f0; display: flex; flex-direction: column; min-height: 100vh; }
+    .header-glass {
+      background: rgba(240, 249, 255, 0.7);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .profile-card {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.15);
+      padding: 2rem;
+    }
+    .booking-card {
+      background: #f9fafb;
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      transition: border-color 0.2s;
+    }
+    .booking-card:hover {
+      border-color: #1A4B84;
+    }
+    .btn-primary {
+      background: #1A4B84;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover {
+      background: #0e3b6b;
+    }
+    .btn-outline {
+      border: 1px solid #1A4B84;
+      color: #1A4B84;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background: #1A4B84;
+      color: white;
+    }
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      background: #f9fafb;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #1A4B84;
+      box-shadow: 0 0 0 3px rgba(26,75,132,0.1);
+    }
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 9999px;
+      background: #dbeafe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1A4B84;
+    }
+    .tab-btn {
+      transition: all 0.2s;
+      padding: 0.5rem 1.2rem;
+      border-radius: 9999px;
+      background: transparent;
+      color: #6b7280;
+      font-weight: 500;
+    }
+    .tab-btn.active {
+      background: #1A4B84;
+      color: white;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .badge-status {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge-confirmed { background: #d1fae5; color: #065f46; }
+    .badge-pending { background: #fef3c7; color: #92400e; }
+    .badge-cancelled { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== ХЕДЕР ========== -->
+  <header class="header-glass fixed top-5 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-[1000] rounded-3xl mx-auto">
+    <div class="mx-auto px-6 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex-shrink-0 flex items-center">
+          <a href="Index .html" class="text-xl md:text-2xl font-bold text-blue-900 tracking-tight">🌍 Geo Explorer</a>
+        </div>
+        <nav class="hidden md:flex space-x-8">
+          <a href="map page.html" data-page="map" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Карта</a>
+          <a href="catalog.html" data-page="catalog" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Каталог</a>
+          <a href="planner.html" data-page="planner" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Подбор тура</a>
+        </nav>
+        <div class="hidden md:flex items-center space-x-5">
+          <select id="currency-selector" class="text-sm font-medium text-slate-600 hover:text-blue-800 bg-transparent border-none focus:ring-0 cursor-pointer">
+            <option value="USD">🇺🇸 USD</option>
+            <option value="EUR">🇪🇺 EUR</option>
+            <option value="RUB">🇷🇺 RUB</option>
+          </select>
+        </div>
+        <div class="md:hidden flex items-center">
+          <button id="mobile-menu-button" class="text-gray-500 hover:text-[#1A4B84] focus:outline-none">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-sky-100/40 backdrop-blur-md rounded-b-3xl">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a href="map page.html" data-page="map" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Карта</a>
+        <a href="catalog.html" data-page="catalog" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Каталог</a>
+        <a href="planner.html" data-page="planner" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Подбор тура</a>
+        <div class="px-3 py-2">
+          <label for="currency-selector-mobile" class="block text-sm font-medium text-gray-700 mb-1">Валюта</label>
+          <select id="currency-selector-mobile" class="w-full rounded-xl border-gray-300 bg-white/70 py-2 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+            <option value="USD">🇺🇸 USD</option>
+            <option value="EUR">🇪🇺 EUR</option>
+            <option value="RUB">🇷🇺 RUB</option>
+          </select>
+        </div>
+        <div class="border-t border-gray-200 pt-4 pb-3">
+          <a href="login.html" class="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-[#1A4B84]">Войти</a>
+          <a href="register.html" class="block w-full text-left px-3 py-2 text-base font-medium text-[#1A4B84] hover:bg-gray-50 rounded-md">Регистрация</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========== ОСНОВНОЙ КОНТЕНТ ========== -->
+  <main class="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-24 pb-12 w-full">
+    <div class="profile-card">
+
+      <!-- Верхняя часть профиля -->
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-6 pb-6 border-b border-gray-200">
+        <div class="avatar" id="user-avatar">И</div>
+        <div class="flex-1">
+          <h1 class="text-2xl font-bold text-blue-900" id="user-name">Иван Петров</h1>
+          <p class="text-gray-600" id="user-email">ivan@example.com</p>
+          <div class="flex flex-wrap gap-3 mt-2">
+            <span class="text-sm text-green-600"><i class="fas fa-check-circle"></i> Аккаунт подтверждён</span>
+            <span class="text-sm text-gray-500">Регистрация: 15.05.2025</span>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="editProfile()" class="btn-outline text-sm"><i class="fas fa-edit mr-1"></i> Редактировать</button>
+          <button onclick="logout()" class="btn-danger text-sm"><i class="fas fa-sign-out-alt mr-1"></i> Выйти</button>
+        </div>
+      </div>
+
+      <!-- Табы: Мои туры / Избранное / Настройки -->
+      <div class="flex flex-wrap gap-2 mt-6 border-b border-gray-200 pb-3">
+        <button data-tab="bookings" class="tab-btn active">Мои бронирования</button>
+        <button data-tab="favorites" class="tab-btn">Избранное</button>
+        <button data-tab="settings" class="tab-btn">Настройки</button>
+      </div>
+
+      <!-- Контент табов -->
+      <div class="mt-6">
+        <!-- Мои бронирования -->
+        <div id="bookings-content" class="tab-content active">
+          <h3 class="text-lg font-semibold text-blue-900 mb-4">История бронирований</h3>
+          <div id="bookings-list">
+            <!-- Бронирования будут вставлены сюда -->
+          </div>
+        </div>
+
+        <!-- Избранное -->
+        <div id="favorites-content" class="tab-content">
+          <h3 class="text-lg font-semibold text-blue-900 mb-4">Избранные туры</h3>
+          <div id="favorites-list">
+            <!-- Избранные туры будут вставлены сюда -->
+          </div>
+        </div>
+
+        <!-- Настройки -->
+        <div id="settings-content" class="tab-content">
+          <h3 class="text-lg font-semibold text-blue-900 mb-4">Настройки профиля</h3>
+          <form id="settings-form" class="space-y-4 max-w-md">
+            <div>
+              <label for="edit-name" class="block text-sm font-medium text-gray-700 mb-1">Имя</label>
+              <input type="text" id="edit-name" class="form-input" value="Иван Петров" />
+            </div>
+            <div>
+              <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input type="email" id="edit-email" class="form-input" value="ivan@example.com" />
+            </div>
+            <div>
+              <label for="edit-password" class="block text-sm font-medium text-gray-700 mb-1">Новый пароль (оставьте пустым, чтобы не менять)</label>
+              <input type="password" id="edit-password" class="form-input" placeholder="Введите новый пароль" />
+            </div>
+            <button type="submit" class="btn-primary">Сохранить изменения</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========== ПОДКЛЮЧАЕМ СКРИПТЫ ========== -->
+  <script>
+    // ==================== МОБИЛЬНОЕ МЕНЮ ====================
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // ==================== ВАЛЮТА (для единообразия) ====================
+    const selectorDesktop = document.getElementById('currency-selector');
+    const selectorMobile = document.getElementById('currency-selector-mobile');
+    if (selectorDesktop) {
+      selectorDesktop.addEventListener('change', function() {
+        if (selectorMobile) selectorMobile.value = this.value;
+        localStorage.setItem('preferredCurrency', this.value);
+      });
+    }
+    if (selectorMobile) {
+      selectorMobile.addEventListener('change', function() {
+        if (selectorDesktop) selectorDesktop.value = this.value;
+        localStorage.setItem('preferredCurrency', this.value);
+      });
+    }
+    const savedCurrency = localStorage.getItem('preferredCurrency') || 'USD';
+    if (selectorDesktop) selectorDesktop.value = savedCurrency;
+    if (selectorMobile) selectorMobile.value = savedCurrency;
+
+    // ==================== ДАННЫЕ ПОЛЬЗОВАТЕЛЯ ====================
+    // В реальном приложении данные приходят с сервера. Здесь мы используем localStorage
+    // или генерируем демо-данные.
+    function getUserData() {
+      let user = localStorage.getItem('user');
+      if (user) {
+        return JSON.parse(user);
+      }
+      // Демо-данные
+      const defaultUser = {
+        name: 'Иван Петров',
+        email: 'ivan@example.com',
+        registered: '15.05.2025',
+        avatar: 'И',
+        bookings: [
+          { id: 1, tour: 'Балийский эскейп', date: '10.06.2026', status: 'confirmed', price: 1299 },
+          { id: 2, tour: 'Горные приключения', date: '20.07.2026', status: 'pending', price: 1890 },
+          { id: 3, tour: 'Сафари в Танзании', date: '05.08.2026', status: 'cancelled', price: 2450 }
+        ],
+        favorites: [1, 3] // ID туров из tours.json
+      };
+      localStorage.setItem('user', JSON.stringify(defaultUser));
+      return defaultUser;
+    }
+
+    let userData = getUserData();
+
+    // ==================== ОТОБРАЖЕНИЕ ПРОФИЛЯ ====================
+    function renderProfile() {
+      document.getElementById('user-name').textContent = userData.name;
+      document.getElementById('user-email').textContent = userData.email;
+      document.getElementById('user-avatar').textContent = userData.avatar || userData.name.charAt(0);
+      // Заполним поля в настройках
+      document.getElementById('edit-name').value = userData.name;
+      document.getElementById('edit-email').value = userData.email;
+      // Рендерим бронирования
+      renderBookings();
+      // Рендерим избранное (заглушка)
+      renderFavorites();
+    }
+
+    // ==================== РЕНДЕРИНГ БРОНИРОВАНИЙ ====================
+    function renderBookings() {
+      const container = document.getElementById('bookings-list');
+      if (!userData.bookings || !userData.bookings.length) {
+        container.innerHTML = `<p class="text-gray-500">У вас пока нет бронирований.</p>`;
+        return;
+      }
+      let html = '';
+      userData.bookings.forEach(b => {
+        let statusClass = '';
+        let statusText = '';
+        switch (b.status) {
+          case 'confirmed': statusClass = 'badge-confirmed'; statusText = 'Подтверждён'; break;
+          case 'pending': statusClass = 'badge-pending'; statusText = 'Ожидает'; break;
+          case 'cancelled': statusClass = 'badge-cancelled'; statusText = 'Отменён'; break;
+          default: statusText = b.status;
+        }
+        html += `
+          <div class="booking-card flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h4 class="font-semibold text-blue-900">${b.tour}</h4>
+              <div class="flex flex-wrap items-center gap-3 text-sm text-gray-600 mt-1">
+                <span><i class="far fa-calendar-alt"></i> ${b.date}</span>
+                <span>$${b.price}</span>
+                <span class="badge-status ${statusClass}">${statusText}</span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="viewBooking(${b.id})" class="text-sm text-blue-900 hover:underline">Подробнее</button>
+              ${b.status !== 'cancelled' ? `<button onclick="cancelBooking(${b.id})" class="text-sm text-red-600 hover:underline">Отменить</button>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // ==================== РЕНДЕРИНГ ИЗБРАННОГО ====================
+    function renderFavorites() {
+      const container = document.getElementById('favorites-list');
+      // В реальном проекте нужно загрузить туры из tours.json и отфильтровать по ID
+      // Для демонстрации создадим заглушку
+      const favTours = userData.favorites || [];
+      if (!favTours.length) {
+        container.innerHTML = `<p class="text-gray-500">Вы ещё не добавили туры в избранное.</p>`;
+        return;
+      }
+      // Загружаем tours.json чтобы получить названия (симулируем)
+      fetch('tours.json')
+        .then(res => res.json())
+        .then(tours => {
+          const favItems = tours.filter(t => favTours.includes(t.id));
+          if (!favItems.length) {
+            container.innerHTML = `<p class="text-gray-500">Избранные туры не найдены.</p>`;
+            return;
+          }
+          let html = '';
+          favItems.forEach(t => {
+            html += `
+              <div class="booking-card flex justify-between items-center">
+                <div>
+                  <h4 class="font-semibold text-blue-900">${t.name}</h4>
+                  <p class="text-sm text-gray-600">${t.duration} дней, $${t.price}</p>
+                </div>
+                <button onclick="goToTour(${t.id})" class="btn-primary text-sm py-1 px-4">Смотреть</button>
+              </div>
+            `;
+          });
+          container.innerHTML = html;
+        })
+        .catch(() => {
+          container.innerHTML = `<p class="text-gray-500">Не удалось загрузить избранное.</p>`;
+        });
+    }
+
+    // ==================== ДЕЙСТВИЯ ====================
+    window.viewBooking = function(id) {
+      alert(`Просмотр бронирования #${id} (демо)`);
+    };
+
+    window.cancelBooking = function(id) {
+      if (confirm('Вы уверены, что хотите отменить бронирование?')) {
+        // В реальном приложении отправляем запрос на сервер
+        const booking = userData.bookings.find(b => b.id === id);
+        if (booking) {
+          booking.status = 'cancelled';
+          localStorage.setItem('user', JSON.stringify(userData));
+          renderBookings();
+        }
+      }
+    };
+
+    window.goToTour = function(tourId) {
+      localStorage.setItem('selectedTourId', tourId);
+      window.location.href = 'tour.html';
+    };
+
+    window.editProfile = function() {
+      // Переключаем на вкладку "Настройки"
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('[data-tab="settings"]').classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('settings-content').classList.add('active');
+    };
+
+    window.logout = function() {
+      if (confirm('Выйти из аккаунта?')) {
+        // Очищаем данные пользователя (или просто редирект на главную)
+        // localStorage.removeItem('user');
+        alert('Вы вышли из аккаунта (демо).');
+        window.location.href = 'Index .html';
+      }
+    };
+
+    // ==================== РЕДАКТИРОВАНИЕ ПРОФИЛЯ ====================
+    document.getElementById('settings-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('edit-name').value.trim();
+      const email = document.getElementById('edit-email').value.trim();
+      const password = document.getElementById('edit-password').value;
+
+      if (!name || !email) {
+        alert('Имя и email обязательны');
+        return;
+      }
+
+      // Обновляем данные пользователя
+      userData.name = name;
+      userData.email = email;
+      userData.avatar = name.charAt(0);
+      if (password) {
+        // В реальном проекте отправляем новый пароль на сервер
+        console.log('Новый пароль установлен');
+      }
+      localStorage.setItem('user', JSON.stringify(userData));
+      // Обновляем интерфейс
+      renderProfile();
+      alert('Данные обновлены!');
+    });
+
+    // ==================== ТАБЫ ====================
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = {
+      bookings: document.getElementById('bookings-content'),
+      favorites: document.getElementById('favorites-content'),
+      settings: document.getElementById('settings-content')
+    };
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        Object.values(tabContents).forEach(c => c.classList.remove('active'));
+        const tab = this.dataset.tab;
+        if (tab === 'favorites') {
+          // Обновляем список избранного при переключении
+          renderFavorites();
+        }
+        tabContents[tab].classList.add('active');
+      });
+    });
+
+    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+    renderProfile();
+  </script>
+</body>
+</html>

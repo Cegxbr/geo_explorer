@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Geo Explorer – туристическое агентство</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <style>
+        .slider-bg { transition: background-image 0.45s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+        #sliderText { transition: opacity 0.4s ease; }
+        .tour-card { transition: transform 0.25s ease, box-shadow 0.3s ease; }
+        .tour-card:hover { transform: translateY(-6px); box-shadow: 0 20px 30px -12px rgba(0,0,0,0.15); }
+        .advantage-icon {
+            background: rgba(26, 75, 132, 0.08);
+            width: 4rem; height: 4rem;
+            border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: #1A4B84;
+            transition: background 0.2s;
+        }
+        .advantage-icon:hover { background: rgba(26, 75, 132, 0.18); }
+        .avatar {
+            width: 3.5rem; height: 3.5rem; border-radius: 9999px;
+            background: #e2e8f0; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.25rem; color: #1A4B84;
+        }
+        .dot { transition: all 0.2s; }
+        .dot:hover { transform: scale(1.25); }
+        .section-alt { background: #faf7f0; }
+        .btn-primary {
+            background: #1A4B84; color: white;
+            padding: 0.6rem 2rem; border-radius: 9999px;
+            font-weight: 600; transition: background 0.2s;
+        }
+        .btn-primary:hover { background: #0e3b6b; }
+        .deal-badge {
+            background: #ef4444; color: white; font-size: 0.7rem;
+            font-weight: 700; padding: 0.15rem 0.9rem; border-radius: 9999px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        #mobile-menu { transition: all 0.2s ease; }
+
+        /* Стили для селектора валюты в хедере */
+        #currency-selector {
+            background: transparent;
+            border: none;
+            font-weight: 500;
+            color: #475569;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        #currency-selector:hover { color: #1A4B84; }
+        #currency-selector:focus { outline: none; }
+    </style>
+</head>
+<body class="flex flex-col items-center font-sans antialiased bg-amber-50/60">
+
+    <!-- ========== HEADER ========== -->
+    <header class="bg-sky-100/40 backdrop-blur-md shadow fixed top-5 w-screen z-[1000] rounded-3xl max-w-7xl mx-auto">
+        <div class="mx-auto px-6 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Логотип -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="Index .html" class="text-xl md:text-2xl font-bold text-blue-900 tracking-tight">🌍 Geo Explorer</a>
+                </div>
+
+                <!-- Навигация (десктоп) -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="map page.html" data-page="map" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Карта</a>
+                    <a href="catalog.html" data-page="catalog" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Каталог</a>
+                    <a href="planner.html" data-page="planner" class="nav-link inline-flex items-center px-1 pt-1 text-sm font-medium text-slate-600 hover:text-blue-800 border-b-2 border-transparent hover:border-cyan-400 transition">Подбор тура</a>
+                </nav>
+
+                <!-- Кнопки входа и селектор валюты (десктоп) -->
+                <div class="hidden md:flex items-center space-x-5">
+                    <a href="login.html" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition">Войти</a>
+                    <a href="register.html" class="bg-blue-900 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition inline-block">Регистрация</a>
+                    <!-- Селектор валюты -->
+                    <select id="currency-selector" class="text-sm font-medium text-slate-600 hover:text-blue-800">
+                        <option value="USD">🇺🇸 USD</option>
+                        <option value="EUR">🇪🇺 EUR</option>
+                        <option value="RUB">🇷🇺 RUB</option>
+                    </select>
+                </div>
+
+                <!-- Мобильное меню (гамбургер) -->
+                <div class="md:hidden flex items-center">
+                    <button id="mobile-menu-button" class="text-gray-500 hover:text-[#1A4B84] focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Мобильное меню (с валютой) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-sky-100/40 backdrop-blur-md rounded-b-3xl">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="map page.html" data-page="map" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Карта</a>
+                <a href="catalog.html" data-page="catalog" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Каталог</a>
+                <a href="planner.html" data-page="planner" class="mobile-nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#1A4B84] hover:bg-gray-50">Подбор тура</a>
+                <!-- Выбор валюты в мобильном меню -->
+                <div class="px-3 py-2">
+                    <label for="currency-selector-mobile" class="block text-sm font-medium text-gray-700 mb-1">Валюта</label>
+                    <select id="currency-selector-mobile" class="w-full rounded-xl border-gray-300 bg-white/70 py-2 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                        <option value="USD">🇺🇸 USD</option>
+                        <option value="EUR">🇪🇺 EUR</option>
+                        <option value="RUB">🇷🇺 RUB</option>
+                    </select>
+                </div>
+                <div class="border-t border-gray-200 pt-4 pb-3">
+                    <a href="login.html" class="text-sm font-medium text-slate-600 hover:text-blue-800 transition">Войти</a>
+                    <a href="register.html" class="bg-blue-900 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition inline-block">Регистрация</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== СЛАЙДЕР ========== -->
+    <div class="w-screen relative mt-24">
+        <div class="relative rounded-3xl overflow-hidden shadow-xl mx-4">
+            <div class="absolute inset-x-0 bottom-2 text-center md:bottom-14 md:right-20 md:text-right z-10">
+                <h1 id="sliderTitle" class="text-xl md:text-2xl lg:text-4xl font-medium text-white tracking-tight drop-shadow-md">Там, где небо целует океан</h1>
+                <p id="sliderText" class="text-xs md:text-xl lg:text-2xl font-medium text-white tracking-tight drop-shadow-md">Райские пляжи и виллы на воде — ваш идеальный побег от реальности</p>
+            </div>
+            <div id="sliderImage" class="slider-bg w-full h-[300px] sm:h-[500px] md:h-[600px] lg:h-[700px] bg-cover bg-center" style="background-image: url('images/head1.jpeg');">
+                <div class="absolute inset-0 bg-black/10 rounded-3xl"></div>
+            </div>
+            <button onclick="prevSlide()" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur rounded-[16px] flex items-center justify-center shadow-md hover:bg-white hover:scale-110 transition-all z-20">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" class="rotate-180">
+                    <path d="M7 4L13 10L7 16" stroke="#1A4B84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button onclick="nextSlide()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 bg-white/80 backdrop-blur rounded-[16px] flex items-center justify-center shadow-md hover:bg-white hover:scale-110 transition-all z-20">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7 4L13 10L7 16" stroke="#1A4B84" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </div>
+        <div class="flex justify-center gap-3 md:gap-4 mt-6">
+            <div class="dot w-3 h-3 md:w-4 md:h-4 rounded-full bg-[#3b82f6] cursor-pointer" data-index="0"></div>
+            <div class="dot w-3 h-3 md:w-4 md:h-4 rounded-full bg-gray-300 cursor-pointer" data-index="1"></div>
+            <div class="dot w-3 h-3 md:w-4 md:h-4 rounded-full bg-gray-300 cursor-pointer" data-index="2"></div>
+            <div class="dot w-3 h-3 md:w-4 md:h-4 rounded-full bg-gray-300 cursor-pointer" data-index="3"></div>
+        </div>
+    </div>
+
+    <!-- ========== БЛОК ПОИСКА ТУРА ========== -->
+    <section class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-2 relative z-10">
+        <div class="bg-white/70 backdrop-blur-md rounded-3xl shadow-lg p-6 md:p-8 border border-white/30">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-900 text-center mb-6">Найдите свой идеальный тур</h2>
+            <form class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Направление</label>
+                    <select class="w-full rounded-xl border-gray-200 bg-white/70 py-2.5 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                        <option>Куда поедем?</option>
+                        <option>Бали</option>
+                        <option>Альпы</option>
+                        <option>Сафари</option>
+                        <option>Европа</option>
+                        <option>Азия</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Дата вылета</label>
+                    <input type="date" class="w-full rounded-xl border-gray-200 bg-white/70 py-2.5 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Количество</label>
+                    <input type="number" min="1" max="20" value="2" class="w-full rounded-xl border-gray-200 bg-white/70 py-2.5 px-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+                </div>
+                <div>
+                    <button onclick="location.href='planner.html'" type="submit" class="btn-primary w-full py-2.5 text-center">Искать туры</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- ========== ПОПУЛЯРНЫЕ ТУРЫ ========== -->
+    <section class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex justify-between items-end mb-8">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight text-blue-900">Популярные туры</h2>
+            <a href="catalog.html" class="text-sm text-blue-700 hover:underline font-medium">Смотреть все →</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Карточка 1: Бали -->
+            <div class="tour-card border border-amber-200/60 rounded-2xl overflow-hidden bg-orange-50/60 shadow-sm">
+                <div class="h-48 bg-[url('images/card1.jpeg')] bg-cover bg-center relative">
+                    <span class="absolute top-3 left-3 bg-white/80 backdrop-blur text-xs font-semibold px-3 py-1 rounded-full text-blue-900">🔥 Горящий</span>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-bold text-blue-900">Балийский эскейп</h3>
+                        <span class="text-amber-500 text-sm"><i class="fas fa-star"></i> 4.9</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">7 дней / 6 ночей</p>
+                    <p class="text-sm text-gray-500 mt-2">Рисовые террасы, древние храмы и бесконечные закаты на пляжах с чёрным песком. Семь дней, чтобы замедлиться и вдохнуть жизнь полной грудью.</p>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-xl font-bold text-blue-900" data-usd-price="1299">$ 1 299</span>
+                        <button onclick="location.href='tour.html'" class="bg-blue-900 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition">Подробнее</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 2: Альпы -->
+            <div class="tour-card border border-amber-200/60 rounded-2xl overflow-hidden bg-orange-50/60 shadow-sm">
+                <div class="h-48 bg-[url('images/card2.jpeg')] bg-cover bg-center relative">
+                    <span class="absolute top-3 left-3 bg-emerald-500/80 backdrop-blur text-xs font-semibold px-3 py-1 rounded-full text-white">Новинка</span>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-bold text-blue-900">Швейцарские Альпы</h3>
+                        <span class="text-amber-500 text-sm"><i class="fas fa-star"></i> 4.8</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">10 дней / 9 ночей</p>
+                    <p class="text-sm text-gray-500 mt-2">Снежные пики, кристальные озёра и поезда, парящие над облаками. Десять дней чистейшего воздуха и видов, от которых перехватывает дыхание..</p>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-xl font-bold text-blue-900" data-usd-price="1890">$ 1 890</span>
+                        <button class="bg-blue-900 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition">Подробнее</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка 3: Сафари -->
+            <div class="tour-card border border-amber-200/60 rounded-2xl overflow-hidden bg-orange-50/60 shadow-sm">
+                <div class="h-48 bg-[url('images/card3.jpeg')] bg-cover bg-center relative">
+                    <span class="absolute top-3 left-3 bg-amber-600/80 backdrop-blur text-xs font-semibold px-3 py-1 rounded-full text-white">Скидка 15%</span>
+                </div>
+                <div class="p-5">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-xl font-bold text-blue-900">Токийский неон</h3>
+                        <span class="text-amber-500 text-sm"><i class="fas fa-star"></i> 4.7</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">5 дней / 4 ночи</p>
+                    <p class="text-sm text-gray-500 mt-2">Ныряйте в бесконечный движ Токио: неоновые джунгли Сибуи, атмосферные бары Синдзюку и модерновый Минато. Пять дней, чтобы раствориться в ритме города, который не засыпает ни на минуту.</p>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="text-xl font-bold text-blue-900" data-usd-price="2450">$ 2 450</span>
+                        <button class="bg-blue-900 text-white px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-950 transition">Подробнее</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ПРЕИМУЩЕСТВА ========== -->
+    <section class="w-full section-alt py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-medium text-center text-blue-900 mb-12">Почему выбирают нас</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                <div class="flex flex-col items-center">
+                    <div class="advantage-icon"><i class="fas fa-globe-americas"></i></div>
+                    <h4 class="text-lg font-bold text-blue-900 mt-4">Более 50 стран</h4>
+                    <p class="text-sm text-gray-600">Широкий выбор направлений на любой вкус и бюджет.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="advantage-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h4 class="text-lg font-bold text-blue-900 mt-4">Безопасность</h4>
+                    <p class="text-sm text-gray-600">Все туры застрахованы, поддержка 24/7.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="advantage-icon"><i class="fas fa-star"></i></div>
+                    <h4 class="text-lg font-bold text-blue-900 mt-4">Отличный сервис</h4>
+                    <p class="text-sm text-gray-600">Персональный менеджер и гибкие условия оплаты.</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="advantage-icon"><i class="fas fa-smile"></i></div>
+                    <h4 class="text-lg font-bold text-blue-900 mt-4">Тысячи довольных клиентов</h4>
+                    <p class="text-sm text-gray-600">Честные отзывы и высокий рейтинг на всех платформах.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== СПЕЦПРЕДЛОЖЕНИЯ ========== -->
+    <section class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-medium text-blue-900 mb-8">Специальные предложения</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Предложение 1 -->
+            <div class="relative rounded-2xl overflow-hidden shadow-lg group">
+                <div class="h-64 bg-[url('images/head1.jpeg')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6">
+                    <span class="deal-badge self-start mb-2">Горящее предложение</span>
+                    <h3 class="text-2xl font-bold text-white">Мальдивы – минус 25%</h3>
+                    <p class="text-white/80 text-sm">Виллы на воде, всё включено. Осталось 3 места.</p>
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="text-white font-bold text-xl" data-usd-price="1890">$ 1 890</span>
+                        <button class="bg-white text-blue-900 px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-50 transition">Забронировать</button>
+                    </div>
+                </div>
+            </div>
+            <!-- Предложение 2 -->
+            <div class="relative rounded-2xl overflow-hidden shadow-lg group">
+                <div class="h-64 bg-[url('images/head3.jpeg')] bg-cover bg-center transition-transform duration-500 group-hover:scale-105"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-6">
+                    <span class="deal-badge self-start mb-2">Раннее бронирование</span>
+                    <h3 class="text-2xl font-bold text-white">Япония – весна 2026</h3>
+                    <p class="text-white/80 text-sm">Сакура, древние храмы и футуристичные города. Скидка до 20%.</p>
+                    <div class="flex justify-between items-center mt-3">
+                        <span class="text-white font-bold text-xl" data-usd-price="2200">$ 2 200</span>
+                        <button class="bg-white text-blue-900 px-5 py-2 rounded-full text-sm font-semibold hover:bg-blue-50 transition">Забронировать</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ОТЗЫВЫ ========== -->
+    <section class="w-full section-alt py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl md:text-3xl lg:text-4xl font-medium text-center text-blue-900 mb-10">Отзывы наших клиентов</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/40">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="avatar">АК</div>
+                        <div>
+                            <p class="font-semibold text-blue-900">Анна К.</p>
+                            <div class="text-amber-400 text-sm"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm">«Отдых на Бали превзошёл все ожидания! Организация на высшем уровне, гид был замечательный. Обязательно вернёмся ещё.»</p>
+                </div>
+                <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/40">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="avatar">МП</div>
+                        <div>
+                            <p class="font-semibold text-blue-900">Михаил П.</p>
+                            <div class="text-amber-400 text-sm"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm">«Сафари в Танзании – это невероятно! Видели всех «Большую пятёрку». Спасибо команде Geo Explorer за идеальный маршрут.»</p>
+                </div>
+                <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-white/40">
+                    <div class="flex items-center gap-4 mb-3">
+                        <div class="avatar">ЕВ</div>
+                        <div>
+                            <p class="font-semibold text-blue-900">Елена В.</p>
+                            <div class="text-amber-400 text-sm"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm">«Очень понравился тур в Альпы. Всё было продумано до мелочей, даже погода радовала. Рекомендую!»</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ПОДПИСКА ========== -->
+    <section class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="bg-blue-900/5 rounded-3xl p-8 md:p-12 text-center backdrop-blur-sm border border-blue-200/30">
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-900">Будьте в курсе новинок</h2>
+            <p class="text-gray-600 mt-2 mb-6">Подпишитесь на рассылку и получайте первыми информацию о скидках и новых турах.</p>
+            <form class="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
+                <input type="email" placeholder="Ваш e-mail" class="flex-1 rounded-full border-gray-300 bg-white/70 py-3 px-5 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition" />
+                <button type="submit" class="btn-primary px-8 py-3 rounded-full">Подписаться</button>
+            </form>
+            <p class="text-xs text-gray-400 mt-4">Мы не передаём ваши данные третьим лицам. Отписка в один клик.</p>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="w-full bg-[#0C1E33] text-gray-300 py-8 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-white font-semibold mb-3">Geo Explorer</h3>
+                <p class="text-sm">Туры по всему миру с интерактивной картой и персональным подбором.</p>
+            </div>
+            <div>
+                <h3 class="text-white font-semibold mb-3">Контакты</h3>
+                <ul class="text-sm space-y-1">
+                    <li><i class="fas fa-phone mr-2"></i>+7 (999) 123-45-67</li>
+                    <li><i class="fas fa-envelope mr-2"></i>info@geoexplorer.ru</li>
+                    <li><i class="fas fa-map-marker-alt mr-2"></i>Москва, ул. Путешествий, 10</li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-white font-semibold mb-3">Мы в соцсетях</h3>
+                <div class="flex space-x-4 text-2xl">
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-gray-300 hover:text-white transition"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="text-center text-xs text-gray-500 mt-8 border-t border-gray-700 pt-4">
+            © 2026 Geo Explorer. Все права защищены.
+        </div>
+    </footer>
+
+    <!-- ========== JAVASCRIPT ========== -->
+    <script>
+        // --- Мобильное меню ---
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // --- Слайдер ---
+        const slidesData = [
+            { image: "images/head1.jpeg", title: "Там, где небо целует океан", text: "Райские пляжи и виллы на воде — ваш идеальный побег от реальности" },
+            { image: "images/head2.jpeg", title: "Дышите полной грудью на высоте", text: "Закаты, от которых захватывает дух. Швейцария, Непал, Патагония — выбирайте свою вершину" },
+            { image: "images/head3.jpeg", title: "Города, которые никогда не спят", text: "Нью-Йорк, Токио, Париж — окунитесь в ритм мировых столиц" },
+            { image: "images/head4.jpeg", title: "Кофе, круассан и Эйфелева башня", text: "Европа с тихих улочек и уютных кафе — путешествия со вкусом" }
+        ];
+        const sliderDiv = document.getElementById('sliderImage');
+        const sliderTitle = document.getElementById('sliderTitle');
+        const sliderText = document.getElementById('sliderText');
+        const dotsArray = document.querySelectorAll('.dot');
+        let currentIdx = 0;
+
+        function updateSliderUI(index) {
+            sliderDiv.style.backgroundImage = `url('${slidesData[index].image}')`;
+            sliderTitle.textContent = slidesData[index].title;
+            sliderText.textContent = slidesData[index].text;
+            dotsArray.forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('bg-[#3b82f6]');
+                    dot.classList.remove('bg-gray-300');
+                } else {
+                    dot.classList.remove('bg-[#3b82f6]');
+                    dot.classList.add('bg-gray-300');
+                }
+            });
+            currentIdx = index;
+        }
+        window.nextSlide = () => {
+            const newIdx = (currentIdx + 1) % slidesData.length;
+            updateSliderUI(newIdx);
+        };
+        window.prevSlide = () => {
+            const newIdx = (currentIdx - 1 + slidesData.length) % slidesData.length;
+            updateSliderUI(newIdx);
+        };
+        window.goToSlide = (index) => { updateSliderUI(index); };
+        dotsArray.forEach((dot, idx) => {
+            dot.addEventListener('click', () => goToSlide(idx));
+        });
+        updateSliderUI(0);
+        setInterval(() => { nextSlide(); }, 6000);
+
+        // --- СМЕНА ВАЛЮТЫ (API + обновление цен) ---
+        (function() {
+            // Элементы селекторов
+            const selectorDesktop = document.getElementById('currency-selector');
+            const selectorMobile = document.getElementById('currency-selector-mobile');
+
+            // Символы валют
+            const symbols = {
+                USD: '$',
+                EUR: '€',
+                RUB: '₽'
+            };
+
+            // Курсы по умолчанию (запасные)
+            let rates = {
+                USD: 1,
+                EUR: 0.92,
+                RUB: 88.5
+            };
+
+            // Загрузка курсов с API (бесплатный exchangerate.host)
+            async function fetchRates() {
+                try {
+                    const response = await fetch('https://api.exchangerate.host/latest?base=USD');
+                    if (!response.ok) throw new Error('API ответил с ошибкой');
+                    const data = await response.json();
+                    if (data && data.rates) {
+                        // Нас интересуют EUR, RUB, USD (он всегда 1)
+                        const newRates = {
+                            USD: 1,
+                            EUR: data.rates.EUR || 0.92,
+                            RUB: data.rates.RUB || 88.5
+                        };
+                        rates = newRates;
+                        // Сохраняем в localStorage как запасной вариант
+                        localStorage.setItem('exchangeRates', JSON.stringify(rates));
+                        localStorage.setItem('exchangeRatesTime', String(Date.now()));
+                    }
+                } catch (error) {
+                    console.warn('Не удалось загрузить курсы валют, используем сохранённые или запасные.');
+                    // Пытаемся взять из localStorage
+                    const cached = localStorage.getItem('exchangeRates');
+                    if (cached) {
+                        try {
+                            const parsed = JSON.parse(cached);
+                            if (parsed.USD && parsed.EUR && parsed.RUB) {
+                                rates = parsed;
+                            }
+                        } catch (e) {}
+                    }
+                    // если не получилось, оставляем запасные
+                }
+            }
+
+            // Обновление всех цен на странице
+            function updatePrices(currency) {
+                const rate = rates[currency] || 1;
+                const symbol = symbols[currency] || '$';
+                const elements = document.querySelectorAll('[data-usd-price]');
+                elements.forEach(el => {
+                    const usd = parseFloat(el.dataset.usdPrice);
+                    if (!isNaN(usd)) {
+                        const converted = (usd * rate).toFixed(0);
+                        // Заменяем текст, сохраняя предыдущий пробел или оформление
+                        el.textContent = symbol + ' ' + converted;
+                    }
+                });
+            }
+
+            // Обработчик смены валюты
+            function onCurrencyChange(event) {
+                const currency = event.target.value;
+                updatePrices(currency);
+                // Сохраняем выбор пользователя
+                localStorage.setItem('preferredCurrency', currency);
+                // Синхронизируем оба селектора
+                if (selectorDesktop && selectorDesktop.value !== currency) {
+                    selectorDesktop.value = currency;
+                }
+                if (selectorMobile && selectorMobile.value !== currency) {
+                    selectorMobile.value = currency;
+                }
+            }
+
+            // Инициализация
+            async function initCurrency() {
+                // Загружаем курсы
+                await fetchRates();
+
+                // Восстанавливаем предпочтения
+                const saved = localStorage.getItem('preferredCurrency') || 'USD';
+                // Устанавливаем в селекторы
+                if (selectorDesktop) selectorDesktop.value = saved;
+                if (selectorMobile) selectorMobile.value = saved;
+
+                // Обновляем цены
+                updatePrices(saved);
+
+                // Вешаем обработчики
+                if (selectorDesktop) {
+                    selectorDesktop.addEventListener('change', onCurrencyChange);
+                }
+                if (selectorMobile) {
+                    selectorMobile.addEventListener('change', onCurrencyChange);
+                }
+            }
+
+            // Запускаем после загрузки DOM
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initCurrency);
+            } else {
+                initCurrency();
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+[
+  {
+    "id": 1,
+    "name": "Балийский эскейп",
+    "type": "beach",
+    "price": 1200,
+    "duration": 7,
+    "available": [{ "start": "2026-06-15", "end": "2026-09-15" }],
+    "coords": [-8.3405, 115.0920],
+    "rating": 4.8,
+    "img": "images/card1.jpeg"
+  },
+  {
+    "id": 2,
+    "name": "Швейцарские Альпы",
+    "type": "mountain",
+    "price": 2500,
+    "duration": 10,
+    "available": [{ "start": "2026-07-01", "end": "2026-09-30" }],
+    "coords": [46.8182, 8.2275],
+    "rating": 4.9,
+    "img": "images/card2.jpeg"
+  },
+  {
+    "id": 3,
+    "name": "Токийский неон",
+    "type": "city",
+    "price": 1800,
+    "duration": 5,
+    "available": [{ "start": "2026-06-20", "end": "2026-08-31" }],
+    "coords": [35.6762, 139.6503],
+    "rating": 4.7,
+    "img": "images/card3.jpeg"
+  },
+  {
+    "id": 4,
+    "name": "Мальдивская лагуна",
+    "type": "beach",
+    "price": 3500,
+    "duration": 7,
+    "available": [{ "start": "2026-06-10", "end": "2026-10-10" }],
+    "coords": [4.1755, 73.5093],
+    "rating": 5.0,
+    "img": "images/card4.jpeg"
+  },
+  {
+    "id": 5,
+    "name": "Патагонский трек",
+    "type": "mountain",
+    "price": 2200,
+    "duration": 12,
+    "available": [{ "start": "2026-10-01", "end": "2026-12-15" }],
+    "coords": [-49.3315, -72.8865],
+    "rating": 4.6,
+    "img": "images/card5.jpeg"
+  },
+  {
+    "id": 6,
+    "name": "Нью-Йоркский экспресс",
+    "type": "city",
+    "price": 1500,
+    "duration": 4,
+    "available": [{ "start": "2026-06-25", "end": "2026-08-25" }],
+    "coords": [40.7128, -74.0060],
+    "rating": 4.5,
+    "img": "images/card6.jpeg"
+  },
+  {
+    "id": 7,
+    "name": "Сейшельский рай",
+    "type": "beach",
+    "price": 2800,
+    "duration": 8,
+    "available": [{ "start": "2026-06-15", "end": "2026-09-15" }],
+    "coords": [-4.6796, 55.4920],
+    "rating": 4.9,
+    "img": "images/card7.jpeg"
+  },
+  {
+    "id": 8,
+    "name": "Непальские Гималаи",
+    "type": "mountain",
+    "price": 1900,
+    "duration": 14,
+    "available": [{ "start": "2026-09-01", "end": "2026-11-30" }],
+    "coords": [27.7172, 85.3240],
+    "rating": 4.8,
+    "img": "images/card8.jpeg"
+  },
+  {
+    "id": 9,
+    "name": "Парижский шик",
+    "type": "city",
+    "price": 1600,
+    "duration": 5,
+    "available": [{ "start": "2026-06-10", "end": "2026-08-31" }],
+    "coords": [48.8566, 2.3522],
+    "rating": 4.6,
+    "img": "images/card9.jpeg"
+  }
+]
